@@ -128,26 +128,32 @@
     ];
 
     estaciones.forEach(estacion => {
-      let color;
+  let color;
 
-      if (estacion.porcentaje >= 40) {
-        color = "#f94144"; // Alta
-      } else if (estacion.porcentaje >= 10) {
-        color = "#f9c74f"; // Media
-      } else {
-        color = "#aed9e0"; // Baja
-      }
+  if (estacion.porcentaje >= 40) {
+    color = "#f94144"; // Alta
+  } else if (estacion.porcentaje >= 10) {
+    color = "#f9c74f"; // Media
+  } else {
+    color = "#aed9e0"; // Baja
+  }
 
-      new mapboxgl.Marker({ color })
-        .setLngLat([estacion.lon, estacion.lat])
-        .setPopup(
-          new mapboxgl.Popup().setHTML(`
-            <strong>${estacion.nombre}</strong><br>
-            Nivel de ruido: ${estacion.porcentaje}%
-          `)
-        )
-        .addTo(map);
+  const marker = new mapboxgl.Marker({ color })
+    .setLngLat([estacion.lon, estacion.lat])
+    .setPopup(
+      new mapboxgl.Popup().setHTML(`
+        <strong>${estacion.nombre}</strong><br>
+        Nivel de ruido: ${estacion.porcentaje}%
+      `)
+    )
+    .addTo(map);
+
+  // Zoom al hacer clic en el marcador
+  marker.getElement().addEventListener('click', () => {
+    map.flyTo({
+      center: [estacion.lon, estacion.lat],
+      zoom: 14, // puedes ajustar el nivel de zoom aquí
+      speed: 1.2
     });
-  </script>
-</body>
-</html>
+  });
+});

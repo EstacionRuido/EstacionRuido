@@ -71,6 +71,19 @@
     .low { background-color: #aed9e0; }
     .medium { background-color: #f9c74f; }
     .high { background-color: #f94144; }
+
+    /* 🔽 Estilo para marcadores personalizados */
+    .custom-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .marker-clicked {
+      transform: scale(1.3);
+    }
   </style>
 </head>
 <body>
@@ -138,7 +151,20 @@
         color = "#aed9e0"; // Baja
       }
 
-      new mapboxgl.Marker({ color })
+      // Crear elemento DOM personalizado
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      el.style.backgroundColor = color;
+
+      // Evento de clic para animación
+      el.addEventListener('click', () => {
+        el.classList.add('marker-clicked');
+        setTimeout(() => {
+          el.classList.remove('marker-clicked');
+        }, 300);
+      });
+
+      new mapboxgl.Marker(el)
         .setLngLat([estacion.lon, estacion.lat])
         .setPopup(
           new mapboxgl.Popup().setHTML(`

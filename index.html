@@ -19,7 +19,6 @@
     }
 
     h1 {
-      font-family: 'Archivo', sans-serif;
       font-weight: 700;
       font-size: 2.5em;
       text-align: center;
@@ -72,24 +71,23 @@
     .medium { background-color: #f9c74f; }
     .high { background-color: #f94144; }
 
-    /* 🔽 Estilo para marcadores personalizados */
     .custom-marker {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
+      font-size: 24px;
+      line-height: 1;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      user-select: none;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
     }
 
-    .marker-clicked {
-      transform: scale(1.3);
-    }
+    .low-marker { color: #aed9e0; }
+    .medium-marker { color: #f9c74f; }
+    .high-marker { color: #f94144; }
   </style>
 </head>
 <body>
 
   <h1>Contaminación Acústica en Línea 2</h1>
-  <p>Este es un mapa de la contaminación acústica percibida en diferentes estaciones de la Línea 2 del Metro de Santiago. Cada estación está marcada según el nivel de ruido estimado.</p>
+  <p>Este es un mapa de la contaminación acústica percibida en diferentes estaciones de la Línea 2 del Metro de Santiago. Cada estación está marcada con un pin 📍 según el nivel de ruido estimado.</p>
 
   <div id="map"></div>
 
@@ -141,39 +139,42 @@
     ];
 
     estaciones.forEach(estacion => {
-      let color;
+      let claseColor;
 
       if (estacion.porcentaje >= 40) {
-        color = "#f94144"; // Alta
+        claseColor = "high-marker";
       } else if (estacion.porcentaje >= 10) {
-        color = "#f9c74f"; // Media
+        claseColor = "medium-marker";
       } else {
-        color = "#aed9e0"; // Baja
+        claseColor = "low-marker";
       }
 
-      // Crear elemento DOM personalizado
       const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.backgroundColor = color;
+      el.className = `custom-marker ${claseColor}`;
+      el.textContent = "📍";
 
-      // Evento de clic para animación
+      const popup = new mapboxgl.Popup().setHTML(`
+        <strong>${estacion.nombre}</strong><br>
+        Nivel de ruido: ${estacion.porcentaje}%
+      `);
+
       el.addEventListener('click', () => {
-        el.classList.add('marker-clicked');
-        setTimeout(() => {
-          el.classList.remove('marker-clicked');
-        }, 300);
+        map.flyTo({
+          center: [estacion.lon, estacion.lat],
+          zoom: 14,
+          speed: 1.2,
+          curve: 1.5,
+          easing: t => t
+        });
+        popup.addTo(map);
       });
 
       new mapboxgl.Marker(el)
         .setLngLat([estacion.lon, estacion.lat])
-        .setPopup(
-          new mapboxgl.Popup().setHTML(`
-            <strong>${estacion.nombre}</strong><br>
-            Nivel de ruido: ${estacion.porcentaje}%
-          `)
-        )
+        .setPopup(popup)
         .addTo(map);
     });
   </script>
 </body>
 </html>
+

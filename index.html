@@ -127,7 +127,7 @@
       { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 }
     ];
 
-    estaciones.forEach(estacion => {
+   estaciones.forEach(estacion => {
   let color;
 
   if (estacion.porcentaje >= 40) {
@@ -138,22 +138,25 @@
     color = "#aed9e0"; // Baja
   }
 
+  // Crear popup por separado
+  const popup = new mapboxgl.Popup().setHTML(`
+    <strong>${estacion.nombre}</strong><br>
+    Nivel de ruido: ${estacion.porcentaje}%
+  `);
+
+  // Crear marcador
   const marker = new mapboxgl.Marker({ color })
     .setLngLat([estacion.lon, estacion.lat])
-    .setPopup(
-      new mapboxgl.Popup().setHTML(`
-        <strong>${estacion.nombre}</strong><br>
-        Nivel de ruido: ${estacion.porcentaje}%
-      `)
-    )
+    .setPopup(popup)
     .addTo(map);
 
-  // Zoom al hacer clic en el marcador
-  marker.getElement().addEventListener('click', () => {
+  // Hacer zoom cuando se abre el popup
+  popup.on('open', () => {
     map.flyTo({
       center: [estacion.lon, estacion.lat],
-      zoom: 14, // puedes ajustar el nivel de zoom aquí
+      zoom: 14,
       speed: 1.2
     });
   });
 });
+

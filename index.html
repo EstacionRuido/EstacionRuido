@@ -7,19 +7,19 @@
 
   <!-- Mapbox CSS -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <!-- Fuente Archivo -->
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Fuente Magnolia-style -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      font-family: 'Archivo', sans-serif;
+      font-family: 'Open Sans', sans-serif;
       background-color: #f9f6f1;
       color: #444;
     }
 
     h1 {
-      font-weight: 700;
+      font-family: 'Playfair Display', serif;
       font-size: 2.5em;
       text-align: center;
       margin-top: 1em;
@@ -70,31 +70,19 @@
     .low { background-color: #aed9e0; }
     .medium { background-color: #f9c74f; }
     .high { background-color: #f94144; }
-
-    .custom-marker {
-      font-size: 24px;
-      line-height: 1;
-      cursor: pointer;
-      user-select: none;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-    }
-
-    .low-marker { color: #aed9e0; }
-    .medium-marker { color: #f9c74f; }
-    .high-marker { color: #f94144; }
   </style>
 </head>
 <body>
 
   <h1>Contaminación Acústica en Línea 2</h1>
-  <p>Este es un mapa de la contaminación acústica percibida en diferentes estaciones de la Línea 2 del Metro de Santiago. Cada estación está marcada con un pin 📍 según el nivel de ruido estimado.</p>
+  <p>Este es un mapa de la contaminación acústica percibida en diferentes estaciones de la Línea 2 del Metro de Santiago. Cada estación está marcada según el nivel de ruido estimado.</p>
 
   <div id="map"></div>
 
   <div class="legend">
-    <div class="legend-item"><div class="color-box low"></div>Contaminación acústica baja (&lt; 10%)</div>
-    <div class="legend-item"><div class="color-box medium"></div>Contaminación acústica media (10% - 39.9%)</div>
-    <div class="legend-item"><div class="color-box high"></div>Contaminación acústica alta (&ge; 40%)</div>
+    <div class="legend-item"><div class="color-box low"></div>Contaminación acústica baja</div>
+    <div class="legend-item"><div class="color-box medium"></div>Contaminación acústica media</div>
+    <div class="legend-item"><div class="color-box high"></div>Contaminación acústica alta</div>
   </div>
 
   <!-- Mapbox JS -->
@@ -105,18 +93,11 @@
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [-70.655, -33.49],
-      zoom: 11.5
+      center: [-70.655, -33.46],
+      zoom: 12
     });
 
     const estaciones = [
-      { nombre: "Hospital del Pino", lat: -33.54390, lon: -70.66422, porcentaje: 4.3 },
-      { nombre: "Copa Lo Martínez", lat: -33.53892, lon: -70.66255, porcentaje: 2.2 },
-      { nombre: "Observatorio", lat: -33.53385, lon: -70.66094, porcentaje: 2.2 },
-      { nombre: "El Bosque", lat: -33.52872, lon: -70.65933, porcentaje: 4.3 },
-      { nombre: "La Cisterna", lat: -33.52360, lon: -70.65782, porcentaje: 46.2 },
-      { nombre: "El Parrón", lat: -33.51810, lon: -70.65600, porcentaje: 1.1 },
-      { nombre: "Lo Ovalle", lat: -33.51300, lon: -70.65630, porcentaje: 15.1 },
       { nombre: "Ciudad del Niño", lat: -33.50954, lon: -70.65665, porcentaje: 2.2 },
       { nombre: "Departamental", lat: -33.50244, lon: -70.65463, porcentaje: 5.4 },
       { nombre: "Lo Vial", lat: -33.49683, lon: -70.65302, porcentaje: 2.2 },
@@ -135,46 +116,24 @@
       { nombre: "Einstein", lat: -33.40595, lon: -70.64317, porcentaje: 1.1 },
       { nombre: "Dorsal", lat: -33.39696, lon: -70.64274, porcentaje: 1.1 },
       { nombre: "Zapadores", lat: -33.39094, lon: -70.64244, porcentaje: 4.3 },
-      { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 }
+      { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 },
     ];
 
     estaciones.forEach(estacion => {
-      let claseColor;
-
-      if (estacion.porcentaje >= 40) {
-        claseColor = "high-marker";
-      } else if (estacion.porcentaje >= 10) {
-        claseColor = "medium-marker";
+      let color;
+      if (estacion.porcentaje < 10) {
+        color = "#aed9e0"; // bajo
+      } else if (estacion.porcentaje < 40) {
+        color = "#f9c74f"; // medio
       } else {
-        claseColor = "low-marker";
+        color = "#f94144"; // alto
       }
 
-      const el = document.createElement('div');
-      el.className = `custom-marker ${claseColor}`;
-      el.textContent = "📍";
-
-      const popup = new mapboxgl.Popup().setHTML(`
-        <strong>${estacion.nombre}</strong><br>
-        Nivel de ruido: ${estacion.porcentaje}%
-      `);
-
-      el.addEventListener('click', () => {
-        map.flyTo({
-          center: [estacion.lon, estacion.lat],
-          zoom: 14,
-          speed: 1.2,
-          curve: 1.5,
-          easing: t => t
-        });
-        popup.addTo(map);
-      });
-
-      new mapboxgl.Marker(el)
+      new mapboxgl.Marker({ color })
         .setLngLat([estacion.lon, estacion.lat])
-        .setPopup(popup)
+        .setPopup(new mapboxgl.Popup().setHTML(`<strong>${estacion.nombre}</strong><br>${estacion.porcentaje}% contaminación acústica`))
         .addTo(map);
     });
   </script>
 </body>
 </html>
-

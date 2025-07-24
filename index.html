@@ -2,153 +2,159 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Mapa Contaminación Acústica - Línea 2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha512-sA+z0pFgcoV0XxCkeEp3aIutEZnKnLMqkZEVf4asO7i13AvEC0VmHgGXY+4wxgAvtMyWwt4nD78wzLPy4IFVAA=="
-    crossorigin=""
-  />
-
-  <!-- Tipografías -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Work+Sans:wght@400&display=swap" rel="stylesheet">
-
+  <title>Estación Ruido</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Work+Sans&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Work Sans', sans-serif;
       background-color: #EEEEEE;
-      color: #444;
+      font-family: 'Work Sans', sans-serif;
     }
-
+    header {
+      text-align: center;
+      padding: 40px 20px 10px 20px;
+    }
     h1 {
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 2.5em;
-      text-align: center;
-      margin-top: 1em;
+      font-size: 2.5rem;
+      margin: 0;
     }
-
+    p.subtitle {
+      font-size: 1.2rem;
+      margin: 10px 0 30px;
+    }
     .map-container {
+      background: white;
+      width: 90%;
       max-width: 1000px;
-      margin: 2em auto;
-      background-color: #fff;
-      border: 1px solid #ccc;
+      margin: 0 auto;
+      padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 1em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-
-    #map {
-      height: 600px;
+    .map {
+      position: relative;
       width: 100%;
-      border-radius: 8px;
+      height: 600px;
     }
-
     .legend {
+      margin: 30px auto;
+      width: 90%;
+      max-width: 600px;
       display: flex;
-      justify-content: center;
-      gap: 1em;
-      margin: 1em auto;
-      font-size: 0.95em;
-      flex-wrap: wrap;
-      max-width: 800px;
+      justify-content: space-around;
     }
-
     .legend-item {
       display: flex;
       align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
     }
-
     .color-box {
-      width: 20px;
-      height: 20px;
-      margin-right: 8px;
-      border-radius: 4px;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
     }
+    .high { background-color: red; }
+    .medium { background-color: orange; }
+    .low { background-color: green; }
 
-    .low { background-color: #aed9e0; }
-    .medium { background-color: #f9c74f; }
-    .high { background-color: #f94144; }
+    .station-marker {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      border: 2px solid white;
+    }
+    .popup {
+      position: absolute;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      white-space: nowrap;
+      display: none;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
-
-  <h1>Contaminación Acústica en Línea 2</h1>
+  <header>
+    <h1>Estación Ruido</h1>
+    <p class="subtitle">La contaminación acústica afecta nuestras vidas sin darnos cuenta</p>
+  </header>
 
   <div class="map-container">
-    <div id="map"></div>
+    <div class="map" id="map">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Santiago_Metro_Network_Map_2023.svg/1024px-Santiago_Metro_Network_Map_2023.svg.png" 
+        alt="Mapa de Santiago con Metro" style="width: 100%; height: 100%; object-fit: cover;">
+      <!-- Estaciones con datos -->
+    </div>
   </div>
 
   <div class="legend">
-    <div class="legend-item"><div class="color-box low"></div>Baja (&lt; 10%)</div>
-    <div class="legend-item"><div class="color-box medium"></div>Media (10% - 39.9%)</div>
-    <div class="legend-item"><div class="color-box high"></div>Alta (&ge; 40%)</div>
+    <div class="legend-item"><div class="color-box high"></div> Nivel alto</div>
+    <div class="legend-item"><div class="color-box medium"></div> Nivel medio</div>
+    <div class="legend-item"><div class="color-box low"></div> Nivel bajo</div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha512-2fGqaNn8bXTRZq+vRAo9tHd7BQKeZ1+yM0c8bK3+vBvEVxEzUqIoOKTNgOg77Zl78j0DF+4XCBcfWH8p4G1g8g=="
-    crossorigin=""
-  ></script>
-
   <script>
-    const map = L.map('map').setView([-33.49, -70.655], 12);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    const estaciones = [
-      { nombre: "Hospital del Pino", lat: -33.54390, lon: -70.66422, porcentaje: 4.3 },
-      { nombre: "Copa Lo Martínez", lat: -33.53892, lon: -70.66255, porcentaje: 2.2 },
-      { nombre: "Observatorio", lat: -33.53385, lon: -70.66094, porcentaje: 2.2 },
-      { nombre: "El Bosque", lat: -33.52872, lon: -70.65933, porcentaje: 4.3 },
-      { nombre: "La Cisterna", lat: -33.52360, lon: -70.65782, porcentaje: 46.2 },
-      { nombre: "El Parrón", lat: -33.51810, lon: -70.65600, porcentaje: 1.1 },
-      { nombre: "Lo Ovalle", lat: -33.51300, lon: -70.65630, porcentaje: 15.1 },
-      { nombre: "Ciudad del Niño", lat: -33.50954, lon: -70.65665, porcentaje: 2.2 },
-      { nombre: "Departamental", lat: -33.50244, lon: -70.65463, porcentaje: 5.4 },
-      { nombre: "Lo Vial", lat: -33.49683, lon: -70.65302, porcentaje: 2.2 },
-      { nombre: "Franklin", lat: -33.49183, lon: -70.65178, porcentaje: 8.6 },
-      { nombre: "Parque O'Higgins", lat: -33.47558, lon: -70.64832, porcentaje: 6.5 },
-      { nombre: "Toesca", lat: -33.46470, lon: -70.64702, porcentaje: 4.3 },
-      { nombre: "Los Héroes", lat: -33.45789, lon: -70.64621, porcentaje: 23.7 },
-      { nombre: "Santa Ana", lat: -33.44889, lon: -70.64500, porcentaje: 13.0 },
-      { nombre: "Puente Cal y Canto", lat: -33.44004, lon: -70.64408, porcentaje: 8.6 },
-      { nombre: "Patronato", lat: -33.43265, lon: -70.64385, porcentaje: 5.4 },
-      { nombre: "Cementerios", lat: -33.42610, lon: -70.64359, porcentaje: 2.2 },
-      { nombre: "Cerro Blanco", lat: -33.41955, lon: -70.64339, porcentaje: 1.1 },
-      { nombre: "Einstein", lat: -33.40595, lon: -70.64317, porcentaje: 1.1 },
-      { nombre: "Dorsal", lat: -33.39696, lon: -70.64274, porcentaje: 1.1 },
-      { nombre: "Zapadores", lat: -33.39094, lon: -70.64244, porcentaje: 4.3 },
-      { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 }
+    const stations = [
+      { name: "Hospital del Pino", level: 4 },
+      { name: "Copa Lo Martínez", level: 2 },
+      { name: "Observatorio", level: 2 },
+      { name: "El Bosque", level: 4 },
+      { name: "La Cisterna", level: 44 },
+      { name: "El Parrón", level: 1 },
+      { name: "Lo Ovalle", level: 16 },
+      { name: "Ciudad del Niño", level: 2 },
+      { name: "Departamental", level: 5 },
+      { name: "Lo Vial", level: 2 },
+      { name: "San Miguel", level: 2 },
+      { name: "El Llano", level: 2 },
+      { name: "Franklin", level: 44 },
+      { name: "Rondizzoni", level: 4 },
+      { name: "Parque O'Higgins", level: 21 },
+      { name: "Toesca", level: 8 },
+      { name: "Los Heroes", level: 72 },
+      { name: "Santa Ana", level: 39 },
+      { name: "Puente Cal y Canto", level: 33 },
+      { name: "Patronato", level: 16 },
+      { name: "Cerro Blanco", level: 0 },
+      { name: "Cementerios", level: 0 },
+      { name: "Einstein", level: 1 },
+      { name: "Dorsal", level: 1 },
+      { name: "Zapadores", level: 4 },
+      { name: "Vespucio Norte", level: 10 }
     ];
 
-    estaciones.forEach(estacion => {
-      let color;
-      if (estacion.porcentaje >= 40) {
-        color = "#f94144";
-      } else if (estacion.porcentaje >= 10) {
-        color = "#f9c74f";
-      } else {
-        color = "#aed9e0";
-      }
+    const map = document.getElementById("map");
 
-      const circle = L.circleMarker([estacion.lat, estacion.lon], {
-        radius: 8,
-        fillColor: color,
-        color: "#555",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.9
-      }).addTo(map);
+    stations.forEach((station, index) => {
+      const marker = document.createElement("div");
+      const popup = document.createElement("div");
 
-      circle.bindPopup(`<strong>${estacion.nombre}</strong><br>Nivel de ruido: ${estacion.porcentaje}%`);
+      let color = "low";
+      if (station.level >= 30) color = "high";
+      else if (station.level >= 10) color = "medium";
+
+      marker.className = `station-marker ${color}`;
+      // Posición ficticia para demostración
+      marker.style.left = `${10 + index * 3}%`;
+      marker.style.top = `${20 + (index % 5) * 5}%`;
+
+      popup.className = "popup";
+      popup.innerText = `${station.name}\nNivel: ${station.level}%`;
+      marker.addEventListener("click", () => {
+        popup.style.display = popup.style.display === "block" ? "none" : "block";
+      });
+
+      marker.appendChild(popup);
+      map.appendChild(marker);
     });
   </script>
 </body>

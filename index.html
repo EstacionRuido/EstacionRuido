@@ -32,19 +32,30 @@
       margin-top: 1em;
     }
 
+    .map-container {
+      max-width: 1000px;
+      margin: 2em auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 1em;
+    }
+
     #map {
       height: 600px;
       width: 100%;
-      margin-top: 1em;
+      border-radius: 8px;
     }
 
     .legend {
       display: flex;
       justify-content: center;
       gap: 1em;
-      margin: 1em;
+      margin: 1em auto;
       font-size: 0.95em;
       flex-wrap: wrap;
+      max-width: 800px;
     }
 
     .legend-item {
@@ -67,7 +78,10 @@
 <body>
 
   <h1>Contaminación Acústica en Línea 2</h1>
-  <div id="map"></div>
+
+  <div class="map-container">
+    <div id="map"></div>
+  </div>
 
   <div class="legend">
     <div class="legend-item"><div class="color-box low"></div>Baja (&lt; 10%)</div>

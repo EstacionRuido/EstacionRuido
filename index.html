@@ -1,55 +1,93 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Mapa Contaminación Acústica - Línea 2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Mapbox CSS -->
-  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
-  <!-- Fuente Magnolia-style -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Open+Sans&display=swap" rel="stylesheet">
-  <!-- Fuente Archivo -->
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha512-sA+z0pFgcoV0XxCkeEp3aIutEZnKnLMqkZEVf4asO7i13AvEC0VmHgGXY+4wxgAvtMyWwt4nD78wzLPy4IFVAA=="
+    crossorigin=""
+  />
+
+  <!-- Tipografías -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Work+Sans:wght@400&display=swap" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      font-family: 'Open Sans', sans-serif;
-      font-family: 'Archivo', sans-serif;
-      background-color: #f9f6f1;
+      font-family: 'Work Sans', sans-serif;
+      background-color: #EEEEEE;
       color: #444;
     }
 
     h1 {
-      font-family: 'Playfair Display', serif;
-      font-family: 'Archivo', sans-serif;
+      font-family: 'Poppins', sans-serif;
       font-weight: 700;
       font-size: 2.5em;
       text-align: center;
       margin-top: 1em;
-@@ -80,9 +81,9 @@
+    }
+
+    #map {
+      height: 600px;
+      width: 100%;
+      margin-top: 1em;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 1em;
+      margin: 1em;
+      font-size: 0.95em;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+
+    .color-box {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 4px;
+    }
+
+    .low { background-color: #aed9e0; }
+    .medium { background-color: #f9c74f; }
+    .high { background-color: #f94144; }
+  </style>
+</head>
+<body>
+
+  <h1>Contaminación Acústica en Línea 2</h1>
   <div id="map"></div>
 
   <div class="legend">
-    <div class="legend-item"><div class="color-box low"></div>Contaminación acústica baja</div>
-    <div class="legend-item"><div class="color-box medium"></div>Contaminación acústica media</div>
-    <div class="legend-item"><div class="color-box high"></div>Contaminación acústica alta</div>
-    <div class="legend-item"><div class="color-box low"></div>Contaminación acústica baja (&lt; 10%)</div>
-    <div class="legend-item"><div class="color-box medium"></div>Contaminación acústica media (10% - 39.9%)</div>
-    <div class="legend-item"><div class="color-box high"></div>Contaminación acústica alta (&ge; 40%)</div>
+    <div class="legend-item"><div class="color-box low"></div>Baja (&lt; 10%)</div>
+    <div class="legend-item"><div class="color-box medium"></div>Media (10% - 39.9%)</div>
+    <div class="legend-item"><div class="color-box high"></div>Alta (&ge; 40%)</div>
   </div>
 
-  <!-- Mapbox JS -->
-@@ -93,11 +94,18 @@
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-70.655, -33.46],
-      zoom: 12
-      center: [-70.655, -33.49],
-      zoom: 11.5
-    });
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha512-2fGqaNn8bXTRZq+vRAo9tHd7BQKeZ1+yM0c8bK3+vBvEVxEzUqIoOKTNgOg77Zl78j0DF+4XCBcfWH8p4G1g8g=="
+    crossorigin=""
+  ></script>
+
+  <script>
+    const map = L.map('map').setView([-33.49, -70.655], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
     const estaciones = [
       { nombre: "Hospital del Pino", lat: -33.54390, lon: -70.66422, porcentaje: 4.3 },
@@ -62,42 +100,42 @@
       { nombre: "Ciudad del Niño", lat: -33.50954, lon: -70.65665, porcentaje: 2.2 },
       { nombre: "Departamental", lat: -33.50244, lon: -70.65463, porcentaje: 5.4 },
       { nombre: "Lo Vial", lat: -33.49683, lon: -70.65302, porcentaje: 2.2 },
-@@ -116,24 +124,30 @@
+      { nombre: "Franklin", lat: -33.49183, lon: -70.65178, porcentaje: 8.6 },
+      { nombre: "Parque O'Higgins", lat: -33.47558, lon: -70.64832, porcentaje: 6.5 },
+      { nombre: "Toesca", lat: -33.46470, lon: -70.64702, porcentaje: 4.3 },
+      { nombre: "Los Héroes", lat: -33.45789, lon: -70.64621, porcentaje: 23.7 },
+      { nombre: "Santa Ana", lat: -33.44889, lon: -70.64500, porcentaje: 13.0 },
+      { nombre: "Puente Cal y Canto", lat: -33.44004, lon: -70.64408, porcentaje: 8.6 },
+      { nombre: "Patronato", lat: -33.43265, lon: -70.64385, porcentaje: 5.4 },
+      { nombre: "Cementerios", lat: -33.42610, lon: -70.64359, porcentaje: 2.2 },
+      { nombre: "Cerro Blanco", lat: -33.41955, lon: -70.64339, porcentaje: 1.1 },
       { nombre: "Einstein", lat: -33.40595, lon: -70.64317, porcentaje: 1.1 },
       { nombre: "Dorsal", lat: -33.39696, lon: -70.64274, porcentaje: 1.1 },
       { nombre: "Zapadores", lat: -33.39094, lon: -70.64244, porcentaje: 4.3 },
-      { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 },
       { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 }
     ];
 
     estaciones.forEach(estacion => {
       let color;
-      if (estacion.porcentaje < 10) {
-        color = "#aed9e0"; // bajo
-      } else if (estacion.porcentaje < 40) {
-        color = "#f9c74f"; // medio
-
       if (estacion.porcentaje >= 40) {
-        color = "#f94144"; // Alta
+        color = "#f94144";
       } else if (estacion.porcentaje >= 10) {
-        color = "#f9c74f"; // Media
+        color = "#f9c74f";
       } else {
-        color = "#f94144"; // alto
-        color = "#aed9e0"; // Baja
+        color = "#aed9e0";
       }
 
-      new mapboxgl.Marker({ color })
-        .setLngLat([estacion.lon, estacion.lat])
-        .setPopup(new mapboxgl.Popup().setHTML(`<strong>${estacion.nombre}</strong><br>${estacion.porcentaje}% contaminación acústica`))
-        .setPopup(
-          new mapboxgl.Popup().setHTML(`
-            <strong>${estacion.nombre}</strong><br>
-            Nivel de ruido: ${estacion.porcentaje}%
-          `)
-        )
-        .addTo(map);
+      const circle = L.circleMarker([estacion.lat, estacion.lon], {
+        radius: 8,
+        fillColor: color,
+        color: "#555",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).addTo(map);
+
+      circle.bindPopup(`<strong>${estacion.nombre}</strong><br>Nivel de ruido: ${estacion.porcentaje}%`);
     });
   </script>
 </body>
-</html>
 </html>

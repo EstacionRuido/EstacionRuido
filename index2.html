@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa Contaminación Acústica - Línea 2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Mapbox CSS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <!-- Fuente Archivo -->
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Archivo', sans-serif;
+      background-color: #f9f6f1;
+      color: #444;
+    }
+
+    h1 {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 700;
+      font-size: 2.5em;
+      text-align: center;
+      margin-top: 1em;
+      color: #774c60;
+    }
+
+    p {
+      font-size: 1.1em;
+      max-width: 800px;
+      margin: 0.5em auto 1.5em;
+      text-align: center;
+      color: #5e5e5e;
+    }
+
+    #map {
+      width: 90%;
+      height: 600px;
+      margin: 0 auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .legend {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .color-box {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+
+    .low { background-color: #aed9e0; }
+    .medium { background-color: #f9c74f; }
+    .high { background-color: #f94144; }
+  </style>
+</head>
+<body>
+
+  <h1>Contaminación Acústica en Línea 2</h1>
+  <p>Este es un mapa de la contaminación acústica percibida en diferentes estaciones de la Línea 2 del Metro de Santiago. Cada estación está marcada según el nivel de ruido estimado.</p>
+
+  <div id="map"></div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="color-box low"></div>Contaminación acústica baja (&lt; 10%)</div>
+    <div class="legend-item"><div class="color-box medium"></div>Contaminación acústica media (10% - 39.9%)</div>
+    <div class="legend-item"><div class="color-box high"></div>Contaminación acústica alta (&ge; 40%)</div>
+  </div>
+
+  <!-- Mapbox JS -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibWlsa3liYW5hbnlhbiIsImEiOiJjbWRldXgzczcwNmhiMm1vOWJscDBoejVyIn0.b62_DeNMUXY9kQImRg5E-w';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [-70.655, -33.49],
+      zoom: 11.5
+    });
+
+    const estaciones = [
+      { nombre: "Hospital del Pino", lat: -33.54390, lon: -70.66422, porcentaje: 4.3 },
+      { nombre: "Copa Lo Martínez", lat: -33.53892, lon: -70.66255, porcentaje: 2.2 },
+      { nombre: "Observatorio", lat: -33.53385, lon: -70.66094, porcentaje: 2.2 },
+      { nombre: "El Bosque", lat: -33.52872, lon: -70.65933, porcentaje: 4.3 },
+      { nombre: "La Cisterna", lat: -33.52360, lon: -70.65782, porcentaje: 46.2 },
+      { nombre: "El Parrón", lat: -33.51810, lon: -70.65600, porcentaje: 1.1 },
+      { nombre: "Lo Ovalle", lat: -33.51300, lon: -70.65630, porcentaje: 15.1 },
+      { nombre: "Ciudad del Niño", lat: -33.50954, lon: -70.65665, porcentaje: 2.2 },
+      { nombre: "Departamental", lat: -33.50244, lon: -70.65463, porcentaje: 5.4 },
+      { nombre: "Lo Vial", lat: -33.49683, lon: -70.65302, porcentaje: 2.2 },
+      { nombre: "San Miguel", lat: -33.48872, lon: -70.65107, porcentaje: 2.2 },
+      { nombre: "El Llano", lat: -33.4826, lon: -70.64938, porcentaje: 1.1 },
+      { nombre: "Franklin", lat: -33.47666, lon: -70.64948, porcentaje: 45.2 },
+      { nombre: "Rondizzoni", lat: -33.46966, lon: -70.65637, porcentaje: 4.3 },
+      { nombre: "Parque O'Higgins", lat: -33.4605, lon: -70.6557, porcentaje: 21.5 },
+      { nombre: "Toesca", lat: -33.45298, lon: -70.65859, porcentaje: 8.6 },
+      { nombre: "Los Héroes", lat: -33.44616, lon: -70.66048, porcentaje: 71 },
+      { nombre: "Santa Ana", lat: -33.43825, lon: -70.6599, porcentaje: 36.6 },
+      { nombre: "Puente Cal y Canto", lat: -33.43284, lon: -70.65308, porcentaje: 31.2 },
+      { nombre: "Patronato", lat: -33.42973, lon: -70.64712, porcentaje: 17.2 },
+      { nombre: "Cerro Blanco", lat: -33.42275, lon: -70.64506, porcentaje: 0 },
+      { nombre: "Cementerios", lat: -33.41398, lon: -70.6436, porcentaje: 0 },
+      { nombre: "Einstein", lat: -33.40595, lon: -70.64317, porcentaje: 1.1 },
+      { nombre: "Dorsal", lat: -33.39696, lon: -70.64274, porcentaje: 1.1 },
+      { nombre: "Zapadores", lat: -33.39094, lon: -70.64244, porcentaje: 4.3 },
+      { nombre: "Vespucio Norte", lat: -33.38075, lon: -70.64634, porcentaje: 8.6 }
+    ];
+
+    estaciones.forEach(estacion => {
+      let color;
+
+      if (estacion.porcentaje >= 40) {
+        color = "#f94144"; // Alta
+      } else if (estacion.porcentaje >= 10) {
+        color = "#f9c74f"; // Media
+      } else {
+        color = "#aed9e0"; // Baja
+      }
+
+      new mapboxgl.Marker({ color })
+        .setLngLat([estacion.lon, estacion.lat])
+        .setPopup(
+          new mapboxgl.Popup().setHTML(`
+            <strong>${estacion.nombre}</strong><br>
+            Nivel de ruido: ${estacion.porcentaje}%
+          `)
+        )
+        .addTo(map);
+    });
+  </script>
+</body>
+</html>
